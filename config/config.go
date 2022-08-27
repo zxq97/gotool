@@ -81,15 +81,15 @@ type LogConf struct {
 }
 
 type Conf struct {
-	Mysql        MysqlConf   `yaml:"mysql"`
-	Tidb         MysqlConf   `yaml:"tidb"`
-	Mongo        MongoConf   `yaml:"mongo"`
-	RedisCluster RedisConf   `yaml:"redis"`
-	MC           MCConf      `yaml:"mc"`
-	Svc          SvcConf     `yaml:"svc"`
-	Etcd         EtcdConf    `yaml:"etcd"`
-	Kafka        KafkaConf   `yaml:"kafka"`
-	LogPath      LogConf     `yaml:"log_path"`
+	Mysql   MysqlConf `yaml:"mysql"`
+	Tidb    MysqlConf `yaml:"tidb"`
+	Mongo   MongoConf `yaml:"mongo"`
+	Redis   RedisConf `yaml:"redis"`
+	MC      MCConf    `yaml:"mc"`
+	Svc     SvcConf   `yaml:"svc"`
+	Etcd    EtcdConf  `yaml:"etcd"`
+	Kafka   KafkaConf `yaml:"kafka"`
+	LogPath LogConf   `yaml:"log_path"`
 }
 
 func getIP() string {
