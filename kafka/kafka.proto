@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package model;
+
+message KafkaMessage {
+  string trace_id = 1;
+  int32 event_type = 2;
+  bytes message = 3;
+}
