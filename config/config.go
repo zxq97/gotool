@@ -9,9 +9,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Shopify/sarama"
 	"github.com/bradfitz/gomemcache/memcache"
-	cluster "github.com/bsm/sarama-cluster"
 	"github.com/go-redis/redis/v8"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,10 +27,6 @@ const (
 	mongoTypeReplica = "replica"
 
 	dbAddr = "%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True"
-
-	defaultDialTimeout  = 500 * time.Millisecond
-	defaultReadTimeout  = 5 * time.Second
-	defaultWriteTimeout = 5 * time.Second
 )
 
 type MysqlConf struct {
@@ -166,28 +160,6 @@ func InitEtcd(conf *EtcdConf) (*clientv3.Client, error) {
 		Endpoints:   conf.Addr,
 		DialTimeout: time.Duration(conf.TTL) * time.Second,
 	})
-}
-
-func InitKafkaProducer(addr []string) (sarama.SyncProducer, error) {
-	kfkConf := sarama.NewConfig()
-	kfkConf.Producer.RequiredAcks = sarama.WaitForAll
-	kfkConf.Producer.Retry.Max = 3
-	kfkConf.Producer.Return.Successes = true
-	kfkConf.Net.DialTimeout = defaultDialTimeout
-	kfkConf.Net.ReadTimeout = defaultReadTimeout
-	kfkConf.Net.WriteTimeout = defaultWriteTimeout
-	return sarama.NewSyncProducer(addr, kfkConf)
-}
-
-func InitKafkaConsumer(broker, topics []string, group string) (*cluster.Consumer, error) {
-	config := cluster.NewConfig()
-	config.Consumer.Return.Errors = true
-	config.Group.Return.Notifications = true
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
-	config.Consumer.Offsets.Initial = sarama.OffsetNewest
-	config.Consumer.Offsets.CommitInterval = 1 * time.Second
-	config.Group.Return.Notifications = true
-	return cluster.NewConsumer(broker, group, topics, config)
 }
 
 func InitLog(path string) (*log.Logger, error) {

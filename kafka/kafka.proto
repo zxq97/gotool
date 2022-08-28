@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package model;
+package kafka;
 
 message KafkaMessage {
   string trace_id = 1;
