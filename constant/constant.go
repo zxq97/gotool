@@ -11,5 +11,7 @@ const (
 	DefaultTimeout = time.Second
 	DefaultTicker  = time.Minute
 
+	DefaultBatchSize = 100
+
 	EtcdScheme = "etcd"
 )
