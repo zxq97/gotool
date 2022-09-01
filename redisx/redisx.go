@@ -6,11 +6,11 @@ import (
 )
 
 type RedisX struct {
-	redis redis.Cmdable
+	redis.Cmdable
 }
 
 func NewRedisX(conf *config.RedisConf) *RedisX {
 	return &RedisX{
-		redis: config.InitRedis(conf),
+		config.InitRedis(conf),
 	}
 }
