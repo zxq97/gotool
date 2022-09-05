@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -74,50 +75,42 @@ type LogConf struct {
 	Debug string `yaml:"debug"`
 }
 
-type Conf struct {
-	Mysql   MysqlConf `yaml:"mysql"`
-	Tidb    MysqlConf `yaml:"tidb"`
-	Mongo   MongoConf `yaml:"mongo"`
-	Redis   RedisConf `yaml:"redis"`
-	MC      MCConf    `yaml:"mc"`
-	Svc     SvcConf   `yaml:"svc"`
-	Etcd    EtcdConf  `yaml:"etcd"`
-	Kafka   KafkaConf `yaml:"kafka"`
-	LogPath LogConf   `yaml:"log_path"`
-}
-
-func getIP() string {
+func getIP() (string, error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
-		return ""
+		return "", err
 	}
 	for _, value := range addrs {
 		if ipnet, ok := value.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String()
+				return ipnet.IP.String(), nil
 			}
 		}
 	}
-	return ""
+	return "", errors.New("not real ip")
 }
 
-func LoadYaml(path string) (*Conf, error) {
-	conf := &Conf{}
-	y, err := ioutil.ReadFile(path)
+func LoadYaml(path string, v interface{}) error {
+	bs, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = yaml.Unmarshal(y, conf)
-	if err != nil {
-		return nil, err
-	}
-	ip := getIP()
-	conf.Svc.Addr = ip + conf.Svc.Addr
-	conf.Svc.Bind = ip + conf.Svc.Bind
-	return conf, err
+	return yaml.Unmarshal(bs, v)
+	//y, err := ioutil.ReadFile(path)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//err = yaml.Unmarshal(y, conf)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//ip := getIP()
+	//conf.Svc.Addr = ip + conf.Svc.Addr
+	//conf.Svc.Bind = ip + conf.Svc.Bind
+	//return conf, err
 }
 
-func InitDB(conf *MysqlConf) (sqlbuilder.Database, error) {
+func (conf *MysqlConf) InitDB() (sqlbuilder.Database, error) {
 	addr := fmt.Sprintf(dbAddr, conf.User, conf.Password, conf.Host, conf.Port, conf.DB)
 	dsn, err := mysql.ParseURL(addr)
 	if err != nil {
@@ -126,7 +119,7 @@ func InitDB(conf *MysqlConf) (sqlbuilder.Database, error) {
 	return mysql.Open(dsn)
 }
 
-func InitMongo(conf *MongoConf) (*mongo.Client, error) {
+func (conf *MongoConf) InitMongo() (*mongo.Client, error) {
 	opts := options.Client().ApplyURI(conf.Addr)
 	switch conf.Type {
 	case mongoTypeCluster:
@@ -137,11 +130,11 @@ func InitMongo(conf *MongoConf) (*mongo.Client, error) {
 	return mongo.Connect(context.TODO(), opts)
 }
 
-func InitMC(addr []string) *memcache.Client {
-	return memcache.New(addr...)
+func (conf *MCConf) InitMC() *memcache.Client {
+	return memcache.New(conf.Addr...)
 }
 
-func InitRedis(conf *RedisConf) redis.Cmdable {
+func (conf *RedisConf) InitRedis() redis.Cmdable {
 	switch conf.Type {
 	case redisTypeCluster:
 		return redis.NewClusterClient(&redis.ClusterOptions{
@@ -155,15 +148,25 @@ func InitRedis(conf *RedisConf) redis.Cmdable {
 	}
 }
 
-func InitEtcd(conf *EtcdConf) (*clientv3.Client, error) {
+func (conf *EtcdConf) InitEtcd() (*clientv3.Client, error) {
 	return clientv3.New(clientv3.Config{
 		Endpoints:   conf.Addr,
 		DialTimeout: time.Duration(conf.TTL) * time.Second,
 	})
 }
 
+func (conf *SvcConf) InitSvc() error {
+	ip, err := getIP()
+	if err != nil {
+		return err
+	}
+	conf.Addr = ip + conf.Addr
+	conf.Bind = ip + conf.Bind
+	return nil
+}
+
 func InitLog(path string) (*log.Logger, error) {
-	fp, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	fp, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
 	if err != nil {
 		return nil, err
 	}

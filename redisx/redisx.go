@@ -11,6 +11,6 @@ type RedisX struct {
 
 func NewRedisX(conf *config.RedisConf) *RedisX {
 	return &RedisX{
-		config.InitRedis(conf),
+		conf.InitRedis(),
 	}
 }

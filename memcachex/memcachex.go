@@ -9,8 +9,8 @@ type MemcacheX struct {
 	*memcache.Client
 }
 
-func NewMemcacheX(addr []string) *MemcacheX {
+func NewMemcacheX(conf *config.MCConf) *MemcacheX {
 	return &MemcacheX{
-		config.InitMC(addr),
+		conf.InitMC(),
 	}
 }

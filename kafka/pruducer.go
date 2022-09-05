@@ -35,7 +35,7 @@ func (producer *Producer) SendMessage(topic string, key []byte, data []byte) err
 		Value: sarama.ByteEncoder(data),
 	})
 	if err != nil {
-		producer.excLogger.Println("SendMessage topic date", topic, string(data), err)
+		producer.excLogger.Println("SendMessage topic data", topic, string(data), err)
 		return err
 	}
 	producer.apiLogger.Println("SendMessage partition offset date", partition, offset, string(data))
