@@ -96,18 +96,6 @@ func LoadYaml(path string, v interface{}) error {
 		return err
 	}
 	return yaml.Unmarshal(bs, v)
-	//y, err := ioutil.ReadFile(path)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//err = yaml.Unmarshal(y, conf)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//ip := getIP()
-	//conf.Svc.Addr = ip + conf.Svc.Addr
-	//conf.Svc.Bind = ip + conf.Svc.Bind
-	//return conf, err
 }
 
 func (conf *MysqlConf) InitDB() (sqlbuilder.Database, error) {
