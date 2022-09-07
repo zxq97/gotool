@@ -28,3 +28,17 @@ func TestRedisX_HIncrByXEX(t *testing.T) {
 		log.Fatalln(err)
 	}
 }
+
+func TestRedisX_HMSetEX(t *testing.T) {
+	rx := NewRedisX(&config.RedisConf{
+		Addr: []string{"127.0.0.1:6379"},
+	})
+	fieldMap := map[string]string{
+		"1": "1",
+		"2": "2",
+	}
+	err := rx.HMSetEX(context.TODO(), "h", fieldMap, time.Hour)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
