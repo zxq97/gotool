@@ -1,13 +1,16 @@
 package rpc
 
-import "github.com/afex/hystrix-go/hystrix"
+import (
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/zxq97/gotool/config"
+)
 
-func initBreaker(commandName string) {
-	hystrix.ConfigureCommand(commandName, hystrix.CommandConfig{
-		RequestVolumeThreshold: 5,
-		MaxConcurrentRequests: 100,
-		Timeout: 3000,
-		SleepWindow: 10000,
-		ErrorPercentThreshold: 20,
+func initBreaker(conf *config.HystrixConf) {
+	hystrix.ConfigureCommand(conf.Name, hystrix.CommandConfig{
+		RequestVolumeThreshold: conf.RequestThreshold,
+		MaxConcurrentRequests: conf.MaxRequests,
+		Timeout: conf.Timeout,
+		SleepWindow: conf.SleepWindow,
+		ErrorPercentThreshold: conf.ErrorPercent,
 	})
 }

@@ -55,9 +55,18 @@ type MCConf struct {
 }
 
 type SvcConf struct {
-	Bind string `yaml:"bind"`
-	Addr string `yaml:"addr"`
-	Name string `yaml:"name"`
+	Bind     string `yaml:"bind"`
+	HttpBind string `yaml:"http_bind"`
+	Name     string `yaml:"name"`
+}
+
+type HystrixConf struct {
+	Name             string `yaml:"name"`
+	RequestThreshold int    `yaml:"request_threshold"`
+	MaxRequests      int    `yaml:"max_requests"`
+	Timeout          int    `yaml:"timeout"`
+	SleepWindow      int    `yaml:"sleep_window"`
+	ErrorPercent     int    `yaml:"error_percent"`
 }
 
 type EtcdConf struct {
@@ -148,7 +157,7 @@ func (conf *SvcConf) InitSvc() error {
 	if err != nil {
 		return err
 	}
-	conf.Addr = ip + conf.Addr
+	conf.HttpBind = ip + conf.HttpBind
 	conf.Bind = ip + conf.Bind
 	return nil
 }

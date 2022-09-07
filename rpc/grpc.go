@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/zxq97/gotool/config"
 	"github.com/zxq97/gotool/constant"
 	"github.com/zxq97/gotool/discover"
 	"github.com/zxq97/gotool/register"
@@ -13,10 +14,10 @@ import (
 	"google.golang.org/grpc/resolver"
 )
 
-func NewGrpcConn(etcdClient *clientv3.Client, svcName string) (*grpc.ClientConn, error) {
+func NewGrpcConn(etcdClient *clientv3.Client, svcName string, hystrixConf *config.HystrixConf) (*grpc.ClientConn, error) {
 	ed := discover.NewEtcdDiscover(etcdClient, svcName)
 	resolver.Register(ed)
-	initBreaker(svcName)
+	initBreaker(hystrixConf)
 	conn, err := grpc.Dial(
 		ed.Scheme()+":///",
 		grpc.WithInsecure(),
