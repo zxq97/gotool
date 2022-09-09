@@ -15,11 +15,12 @@ type Consumer struct {
 	apiLogger *log.Logger
 	excLogger *log.Logger
 	consumer  *cluster.Consumer
+	fn        func(context.Context, *KafkaMessage)
 	done      chan struct{}
 	group     string
 }
 
-func InitConsumer(broker, topics []string, group string, apiLogger, excLogger *log.Logger) (*Consumer, error) {
+func InitConsumer(broker, topics []string, group string, fn func(context.Context, *KafkaMessage), apiLogger, excLogger *log.Logger) (*Consumer, error) {
 	config := cluster.NewConfig()
 	config.Consumer.Return.Errors = true
 	config.Group.Return.Notifications = true
@@ -32,10 +33,10 @@ func InitConsumer(broker, topics []string, group string, apiLogger, excLogger *l
 		return nil, err
 	}
 	done := make(chan struct{})
-	return &Consumer{consumer: consumer, apiLogger: apiLogger, excLogger: excLogger, done: done, group: group}, nil
+	return &Consumer{consumer: consumer, fn: fn, apiLogger: apiLogger, excLogger: excLogger, done: done, group: group}, nil
 }
 
-func (consumer *Consumer) Start(fn func(ctx context.Context, msg *KafkaMessage)) {
+func (consumer *Consumer) Start() {
 	concurrent.Go(func() {
 		for {
 			select {
@@ -48,7 +49,7 @@ func (consumer *Consumer) Start(fn func(ctx context.Context, msg *KafkaMessage))
 					}
 					ctx, cancel := consumerContext(kfkmsg.TraceId)
 					now := time.Now()
-					fn(ctx, kfkmsg)
+					consumer.fn(ctx, kfkmsg)
 					consumer.consumer.MarkOffset(msg, "")
 					cancel()
 					consumer.apiLogger.Println("consumer group since", consumer.group, time.Since(now))
