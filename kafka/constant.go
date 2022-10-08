@@ -14,6 +14,10 @@ const (
 	TopicCommentCacheRebuild = "comment_cache_rebuild"
 	TopicCommentOperator     = "comment_operator"
 
+	TopicRelationFollow       = "relation_follow"
+	TopicRelationCacheRebuild = "relation_cache_rebuild"
+	TopicRelationOperator     = "comment_operator"
+
 	TopicOpusOperator = "opus_operator"
 
 	EventTypeCreate        = 1
