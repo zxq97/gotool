@@ -43,11 +43,25 @@ func TestRedisX_HMSetEX(t *testing.T) {
 	}
 }
 
-func TestRedisX_HMGetEX(t *testing.T) {
+func TestRedisX_HMSetXEX(t *testing.T) {
 	rx := NewRedisX(&config.RedisConf{
 		Addr: []string{"127.0.0.1:6379"},
 	})
-	val, err := rx.HMGetEX(context.TODO(), "h", time.Hour, "1", "2", "3")
+	fieldMap := map[string]interface{}{
+		"1": "1",
+		"2": "2",
+	}
+	err := rx.HMSetXEX(context.TODO(), "h", fieldMap, time.Hour)
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func TestRedisX_HMGetXEX(t *testing.T) {
+	rx := NewRedisX(&config.RedisConf{
+		Addr: []string{"127.0.0.1:6379"},
+	})
+	val, err := rx.HMGetXEX(context.TODO(), "h", time.Hour, "1", "2", "3")
 	if err != nil {
 		log.Fatalln(err)
 	}

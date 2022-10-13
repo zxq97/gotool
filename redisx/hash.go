@@ -32,7 +32,17 @@ func (rx *RedisX) HMSetEX(ctx context.Context, key string, fieldMap map[string]i
 	return err
 }
 
-func (rx *RedisX) HMGetEX(ctx context.Context, key string, ttl time.Duration, field ...string) ([]interface{}, error) {
+func (rx *RedisX) HMSetXEX(ctx context.Context, key string, fieldMap map[string]interface{}, ttl time.Duration) error {
+	ok, err := rx.Expire(ctx, key, ttl).Result()
+	if err != nil {
+		return err
+	} else if !ok {
+		return redis.Nil
+	}
+	return rx.HMSet(ctx, key, fieldMap).Err()
+}
+
+func (rx *RedisX) HMGetXEX(ctx context.Context, key string, ttl time.Duration, field ...string) ([]interface{}, error) {
 	ok, err := rx.Expire(ctx, key, ttl).Result()
 	if err != nil {
 		return nil, err
