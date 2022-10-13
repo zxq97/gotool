@@ -13,7 +13,7 @@ func (rx *RedisX) HIncrByXEX(ctx context.Context, key, field string, incr int64,
 	} else if !ok {
 		return redis.Nil
 	}
-	return rx.HIncrByEX(ctx, key, field, incr, ttl)
+	return rx.HIncrBy(ctx, key, field, incr).Err()
 }
 
 func (rx *RedisX) HIncrByEX(ctx context.Context, key, field string, incr int64, ttl time.Duration) error {
