@@ -2,13 +2,16 @@ package redisx
 
 import (
 	"context"
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
 func (rx *RedisX) HIncrByXEX(ctx context.Context, key, field string, incr int64, ttl time.Duration) error {
 	ok, err := rx.Expire(ctx, key, ttl).Result()
-	if err != nil || !ok {
+	if err != nil {
 		return err
+	} else if !ok {
+		return redis.Nil
 	}
 	return rx.HIncrByEX(ctx, key, field, incr, ttl)
 }
@@ -27,4 +30,14 @@ func (rx *RedisX) HMSetEX(ctx context.Context, key string, fieldMap map[string]i
 	pipe.Expire(ctx, key, ttl)
 	_, err := pipe.Exec(ctx)
 	return err
+}
+
+func (rx *RedisX) HMGetEX(ctx context.Context, key string, ttl time.Duration, field ...string) ([]interface{}, error) {
+	ok, err := rx.Expire(ctx, key, ttl).Result()
+	if err != nil {
+		return nil, err
+	} else if !ok {
+		return nil, redis.Nil
+	}
+	return rx.HMGet(ctx, key, field...).Result()
 }

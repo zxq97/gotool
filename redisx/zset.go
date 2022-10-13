@@ -12,8 +12,10 @@ import (
 
 func (rx *RedisX) ZAddXEX(ctx context.Context, key string, zs []*redis.Z, ttl time.Duration) error {
 	ok, err := rx.Expire(ctx, key, ttl).Result()
-	if err != nil || !ok {
+	if err != nil {
 		return err
+	} else if !ok {
+		return redis.Nil
 	}
 	return rx.ZAddEX(ctx, key, zs, ttl)
 }
