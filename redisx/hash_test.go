@@ -67,3 +67,14 @@ func TestRedisX_HMGetXEX(t *testing.T) {
 	}
 	log.Println(val)
 }
+
+func TestRedisX_HGetXEX(t *testing.T) {
+	rx := NewRedisX(&config.RedisConf{
+		Addr: []string{"127.0.0.1:6379"},
+	})
+	val, err := rx.HGetXEX(context.TODO(), "h", "1", time.Hour)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(val)
+}
