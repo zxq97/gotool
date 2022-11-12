@@ -56,7 +56,7 @@ func (rx *RedisX) ZAddEX(ctx context.Context, key string, zs []*redis.Z, ttl tim
 	return eg.Wait()
 }
 
-func (rx *RedisX) ZRevRangeByMember(ctx context.Context, key, member string, offset int64) ([]int64, error) {
+func (rx *RedisX) ZRevRangeByMember(ctx context.Context, key string, member interface{}, offset int64) ([]int64, error) {
 	res, err := zRevRangeByMemberScript.Run(ctx, rx, []string{key}, member, offset).Result()
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (rx *RedisX) ZRevRangeByMember(ctx context.Context, key, member string, off
 	return ids, nil
 }
 
-func (rx *RedisX) ZRevRangeByMemberWithScores(ctx context.Context, key, member string, offset int64) ([]*redis.Z, error) {
+func (rx *RedisX) ZRevRangeByMemberWithScores(ctx context.Context, key string, member interface{}, offset int64) ([]*redis.Z, error) {
 	res, err := zRevRangeByMemberWithScoresScript.Run(ctx, rx, []string{key}, member, offset).Result()
 	if err != nil {
 		return nil, err
