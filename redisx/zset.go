@@ -5,9 +5,20 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/zxq97/gotool/cast"
 	"github.com/zxq97/gotool/concurrent"
 	"github.com/zxq97/gotool/constant"
 	"github.com/zxq97/gotool/sequence"
+)
+
+var (
+	zRevRangeByMemberScript = redis.NewScript(`
+        local rank = redis.call("ZRevRank", KEYS[1], ARGV[1])
+        if not rank then
+            rank = 0
+        end
+        return redis.call("ZRevRange", KEYS[1], rank, rank+ARGV[2])
+    `)
 )
 
 func (rx *RedisX) ZAddXEX(ctx context.Context, key string, zs []*redis.Z, ttl time.Duration) error {
@@ -31,4 +42,21 @@ func (rx *RedisX) ZAddEX(ctx context.Context, key string, zs []*redis.Z, ttl tim
 		})
 	}
 	return eg.Wait()
+}
+
+func (rx *RedisX) ZRevRangeByMember(ctx context.Context, key, member string, offset int64) ([]int64, error) {
+	res, err := zRevRangeByMemberScript.Run(ctx, rx, []string{key}, member, offset).Result()
+	if err != nil {
+		return nil, err
+	}
+	val, ok := res.([]interface{})
+	if !ok || len(val) == 0 {
+		return nil, redis.Nil
+	}
+	ids := make([]int64, 0, offset)
+	for _, v := range val {
+		id := v.(string)
+		ids = append(ids, cast.ParseInt(id, 0))
+	}
+	return ids, nil
 }
